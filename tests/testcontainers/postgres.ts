@@ -16,6 +16,8 @@ export class PostgresTestContainer {
   public async createContainer(): Promise<void> {
     try {
       const container = await new PostgreSqlContainer().start()
+      await new Promise((resolve) => setTimeout(resolve, 5000))
+
       const options = {
         user: container.getUsername(),
         host: container.getHost(),
@@ -51,6 +53,20 @@ export class PostgresTestContainer {
         error,
       )
       throw error
+    }
+  }
+
+  public getOptions(): any {
+    if (!this.container) {
+      throw new Error('Postgres container is not initialized')
+    }
+
+    return {
+      user: this.container.getUsername(),
+      host: this.container.getHost(),
+      database: this.container.getDatabase(),
+      password: this.container.getPassword(),
+      port: this.container.getMappedPort(5432),
     }
   }
 
