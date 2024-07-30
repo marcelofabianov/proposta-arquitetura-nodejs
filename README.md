@@ -13,3 +13,88 @@ Dentro de um módulo, será utilizado a arquitetura Ports and Adapters, onde os 
 ## Consumidores Externos
 
 Para consumidores externos como SPA, BFF, Mobile, etc, será utilizado uma API Gateway, que será responsável por orquestrar as chamadas entre os módulos e os consumidores externos.
+
+## Estrutura de diretórios
+
+```bash
+.
+src
+├── api
+│   └── v1
+│       ├── gen
+│       └── proto
+├── config
+│   └── env.ts
+├── main.ts
+├── modules
+│   ├── _core
+│   │   ├── domain
+│   │   │   ├── base-entity.ts
+│   │   │   └── error.ts
+│   │   ├── error-handle.ts
+│   │   ├── infrastructure
+│   │   │   ├── database.ts
+│   │   │   └── error.ts
+│   │   └── tests
+│   └── identity-gateway
+│       ├── adapter
+│       │   ├── inbound
+│       │   │   ├── grpc
+│       │   │   │   └── user_server.ts
+│       │   │   └── kafka
+│       │   │       └── consumer.ts
+│       │   └── outbound
+│       │       ├── kafka
+│       │       │   └── producer.ts
+│       │       └── postgres
+│       │           └── user-repository.ts
+│       ├── application
+│       │   ├── service
+│       │   │   └── user-service.ts
+│       │   └── usecase
+│       │       └── create-user.ts
+│       ├── domain
+│       │   ├── error
+│       │   │   └── user_error.ts
+│       │   ├── event
+│       │   │   └── user_created.ts
+│       │   └── user.ts
+│       ├── port
+│       │   ├── inbound
+│       │   │   └── user.ts
+│       │   └── outbound
+│       │       └── user.ts
+│       └── tests
+│           ├── e2e
+│           ├── integration
+│           └── unit
+├── server.ts
+└── services
+    ├── audit
+    │   └── audit.ts
+    ├── database
+    │   ├── pg-pool.ts
+    │   └── postgres.ts
+    ├── event-broker
+    │   └── kafka.ts
+    ├── grpc
+    │   └── server.ts
+    ├── hasher
+    │   └── argo2-hasher.ts
+    ├── identity-provider
+    │   └── keycloak.ts
+    ├── logger
+    │   └── log4js.ts
+    ├── message-broker
+    │   └── rabbitmq.ts
+    ├── metrics
+    │   └── metrics.ts
+    └── tracing
+        └── tracing.ts
+storage
+├── certs
+└── logs
+tests
+└── testcontainers
+    └── postgres.ts
+```
