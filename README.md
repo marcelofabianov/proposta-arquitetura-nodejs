@@ -9,3 +9,7 @@ A comunicação entre os módulos será feita através de eventos assíncronos, 
 ## Arquitetura dentro de um módulo
 
 Dentro de um módulo, será utilizado a arquitetura Ports and Adapters, onde os componentes do sistema são divididos em três camadas: Application, Domain e Adapter. A camada de Application é responsável por orquestrar as chamadas entre os componentes do sistema, a camada de Domain é responsável por implementar as regras de domínio e a camada de Adapter é abstração de recursos do tipo inbounds e outbounds, como banco de dados, serviços externos, etc.
+
+## Consumidores Externos
+
+Para consumidores externos como SPA, BFF, Mobile, etc, será utilizado uma API Gateway, que será responsável por orquestrar as chamadas entre os módulos e os consumidores externos.
