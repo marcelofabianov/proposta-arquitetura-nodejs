@@ -1,0 +1,33 @@
+
+services:
+  contract-db:
+    container_name: contract-db
+    restart: always
+    image: 'postgres:16.2'
+    ports:
+      - '${CO_DB_PORT:-5432}:5432'
+    environment:
+      POSTGRES_USER: ${CO_DB_USER:-username}
+      POSTGRES_PASSWORD: ${CO_DB_PASSWORD:-password}
+      POSTGRES_DB: ${CO_DB_DATABASE:-contract-db}
+    volumes:
+      - contract-db-data:/var/lib/postgresql/data:rw
+    networks:
+      - contract-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U ${CO_DB_USER:-username} -d ${CO_DB_DATABASE:-contract-db}'"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  contract-db-data:
+    driver: local
+
+networks:
+  contract-network:
+    driver: bridge
