@@ -1,20 +1,63 @@
-import { Pool, QueryResult, QueryResultRow } from 'pg'
+import { Client, ClientConfig, QueryResult, QueryResultRow } from 'pg'
 import { Database, QueryParams } from '@/modules/_core/infrastructure/database'
 import { DatabaseQueryError } from '@/modules/_core/infrastructure/error'
 
 export class PostgresDatabase implements Database {
-  private pool: Pool
+  private client: Client
+  private isConnected: boolean = false
 
-  public constructor(pool: Pool) {
-    this.pool = pool
+  public constructor(options: ClientConfig) {
+    this.client = new Client(options)
+  }
+
+  public async connect(): Promise<void> {
+    if (!this.isConnected) {
+      try {
+        await this.client.connect()
+        this.isConnected = true
+      } catch (error: unknown) {
+        let errorMessage: string
+
+        if (error instanceof Error) {
+          errorMessage = `Failed to connect to the database: ${error.message}`
+        } else {
+          errorMessage =
+            'An unknown error occurred while connecting to the database'
+        }
+
+        throw new DatabaseQueryError(errorMessage)
+      }
+    }
+  }
+
+  public async disconnect(): Promise<void> {
+    if (this.isConnected) {
+      try {
+        await this.client.end()
+        this.isConnected = false
+      } catch (error: unknown) {
+        let errorMessage: string
+
+        if (error instanceof Error) {
+          errorMessage = `Failed to disconnect from the database: ${error.message}`
+        } else {
+          errorMessage =
+            'An unknown error occurred while disconnecting from the database'
+        }
+
+        throw new DatabaseQueryError(errorMessage)
+      }
+    }
   }
 
   public async query<T extends QueryResultRow>(
     text: string,
     params?: QueryParams[],
   ): Promise<T[]> {
+    await this.connect()
+
     try {
-      const result: QueryResult<T> = await this.pool.query<T>(text, params)
+      const result: QueryResult<T> = await this.client.query<T>(text, params)
       return result.rows
     } catch (error: unknown) {
       let errorMessage: string
