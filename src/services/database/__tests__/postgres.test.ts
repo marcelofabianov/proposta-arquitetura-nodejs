@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { ClientConfig, QueryResultRow } from 'pg'
-import { PostgresDatabase } from '@/services/database/postgres'
+import { QueryResultRow } from 'pg'
+import { ClientConfig } from '../config'
+import { PostgresClientDatabase } from '@/services/database/postgres-client'
 import { PostgresTestContainer } from '&tests/testcontainers/postgres'
 
 interface TestTableRow extends QueryResultRow {
@@ -8,9 +9,9 @@ interface TestTableRow extends QueryResultRow {
   name: string
 }
 
-describe('PostgresDatabase', () => {
+describe('PostgresClientDatabase', () => {
   let postgresTestContainer: PostgresTestContainer
-  let postgresDatabase: PostgresDatabase
+  let postgresDatabase: PostgresClientDatabase
 
   beforeAll(async () => {
     postgresTestContainer = new PostgresTestContainer()
@@ -24,7 +25,7 @@ describe('PostgresDatabase', () => {
       port: postgresTestContainer.getOptions().port,
     }
 
-    postgresDatabase = new PostgresDatabase(options)
+    postgresDatabase = new PostgresClientDatabase(options)
   })
 
   afterAll(async () => {

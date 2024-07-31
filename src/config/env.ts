@@ -7,7 +7,7 @@ const envSchema = z.object({
   DB_USER: z.string(),
   DB_PASSWORD: z.string(),
   DB_DATABASE: z.string(),
-  DB_MODE: z.string(),
+  DB_SSL: z.string().transform(Boolean),
   DB_TIMEOUT: z.string().transform(Number),
   DB_IDLE_TIMEOUT: z.string().transform(Number),
   DB_MAX_CONNECTIONS: z.string().transform(Number),

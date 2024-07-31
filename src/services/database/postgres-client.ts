@@ -1,8 +1,12 @@
-import { Client, ClientConfig, QueryResult, QueryResultRow } from 'pg'
-import { Database, QueryParams } from '@/modules/_core/infrastructure/database'
+import { Client, QueryResult, QueryResultRow } from 'pg'
+import { ClientConfig } from '@/services/database/config'
+import {
+  DatabaseInterface,
+  QueryParams,
+} from '@/modules/_core/infrastructure/database'
 import { DatabaseQueryError } from '@/modules/_core/infrastructure/error'
 
-export class PostgresDatabase implements Database {
+export class PostgresClientDatabase implements DatabaseInterface {
   private client: Client
   private isConnected: boolean = false
 
