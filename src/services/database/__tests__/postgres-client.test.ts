@@ -15,7 +15,12 @@ describe('PostgresClientDatabase', () => {
 
   beforeAll(async () => {
     postgresTestContainer = new PostgresTestContainer()
-    await postgresTestContainer.createContainer()
+    try {
+      await postgresTestContainer.createContainer()
+    } catch (error) {
+      console.error('Error creating Postgres container:', error)
+      throw error
+    }
 
     const options: ClientConfig = {
       user: postgresTestContainer.getOptions().user,
@@ -29,8 +34,17 @@ describe('PostgresClientDatabase', () => {
   })
 
   afterAll(async () => {
-    await postgresDatabase.disconnect()
-    await postgresTestContainer.stopContainer()
+    try {
+      await postgresDatabase.disconnect()
+    } catch (error) {
+      console.error('Error disconnecting Postgres client:', error)
+    }
+
+    try {
+      await postgresTestContainer.stopContainer()
+    } catch (error) {
+      console.error('Error stopping Postgres container:', error)
+    }
   })
 
   it('should connect to the database and execute a query', async () => {

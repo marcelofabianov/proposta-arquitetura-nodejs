@@ -23,6 +23,10 @@ describe('PostgresPoolDatabase', () => {
       database: postgresTestContainer.getOptions().database,
       password: postgresTestContainer.getOptions().password,
       port: postgresTestContainer.getOptions().port,
+      connectionTimeoutMillis: 30000,
+      idleTimeoutMillis: 60000,
+      max: 10,
+      min: 2,
     }
 
     postgresDatabase = new PostgresPoolDatabase(options)

@@ -16,7 +16,28 @@ export class PostgresTestContainer {
   public async createContainer(): Promise<void> {
     try {
       const container = await new PostgreSqlContainer().start()
-      await new Promise((resolve) => setTimeout(resolve, 5000))
+
+      let isReady = false
+      const maxRetries = 10
+      const retryInterval = 1000
+
+      for (let i = 0; i < maxRetries; i++) {
+        try {
+          await container.exec(['pg_isready', '-U', container.getUsername()])
+          isReady = true
+          break
+        } catch (error) {
+          if (i < maxRetries - 1) {
+            await new Promise((resolve) => setTimeout(resolve, retryInterval))
+          } else {
+            throw error
+          }
+        }
+      }
+
+      if (!isReady) {
+        throw new Error('Postgres container failed to start')
+      }
 
       const options = {
         user: container.getUsername(),

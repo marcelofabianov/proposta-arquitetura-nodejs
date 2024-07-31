@@ -10,7 +10,8 @@
     "lint:fix": "eslint --fix --quiet src && prettier -w src",
     "test": "NODE_ENV=test && vitest run",
     "test:watch": "NODE_ENV=test && vitest --watch",
-    "test:debug": "NODE_ENV=test && vitest --inspect-brk --watch --pool forks --poolOptions.forks.singleFork"
+    "test:debug": "NODE_ENV=test && vitest --inspect-brk --watch --pool forks --poolOptions.forks.singleFork",
+    "test:coverage": "NODE_ENV=test && vitest --coverage"
   },
   "license": "MIT",
   "engines": {
