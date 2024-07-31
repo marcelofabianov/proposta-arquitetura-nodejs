@@ -1,16 +1,5 @@
-import { ClientConfig as ClientConfigPG } from 'pg'
-import { ConnectionOptions } from 'tls'
+import { ClientConfig as ClientConfigPG, PoolConfig as PoolConfigPG } from 'pg'
 
 export interface ClientConfig extends ClientConfigPG {}
 
-export interface PoolConfig {
-  user?: string
-  password?: string
-  host?: string
-  database?: string
-  port?: number
-  ssl?: boolean | ConnectionOptions
-  max: number
-  idleTimeoutMillis: number
-  connectionTimeoutMillis: number
-}
+export interface PoolConfig extends PoolConfigPG {}
