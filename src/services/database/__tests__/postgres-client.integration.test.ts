@@ -1,40 +1,51 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { PoolConfig } from '../config'
-import { PostgresPoolDatabase } from '@/services/database/postgres-pool'
-import { PostgresTestContainer } from '&tests/testcontainers/postgres'
 import { QueryResultRow } from 'pg'
+import { ClientConfig } from '../config'
+import { PostgresClientDatabase } from '@/services/database/postgres-client'
+import { PostgresClientTestContainer } from '&tests/testcontainers/postgres-client'
 
 interface TestTableRow extends QueryResultRow {
   id: number
   name: string
 }
 
-describe('PostgresPoolDatabase', () => {
-  let postgresTestContainer: PostgresTestContainer
-  let postgresDatabase: PostgresPoolDatabase
+describe('PostgresClientDatabase', () => {
+  let postgresTestContainer: PostgresClientTestContainer
+  let postgresDatabase: PostgresClientDatabase
 
   beforeAll(async () => {
-    postgresTestContainer = new PostgresTestContainer()
-    await postgresTestContainer.createContainer()
+    postgresTestContainer = new PostgresClientTestContainer()
+    try {
+      await postgresTestContainer.createContainer()
+    } catch (error) {
+      console.error('Error creating Postgres container:', error)
+      throw error
+    }
 
-    const options: PoolConfig = {
+    const options: ClientConfig = {
       user: postgresTestContainer.getOptions().user,
       host: postgresTestContainer.getOptions().host,
       database: postgresTestContainer.getOptions().database,
       password: postgresTestContainer.getOptions().password,
       port: postgresTestContainer.getOptions().port,
-      connectionTimeoutMillis: 30000,
-      idleTimeoutMillis: 60000,
-      max: 10,
-      min: 2,
     }
 
-    postgresDatabase = new PostgresPoolDatabase(options)
+    postgresDatabase = new PostgresClientDatabase(options)
   })
 
   afterAll(async () => {
-    await postgresTestContainer.stopContainer()
-  }, 10000)
+    try {
+      await postgresDatabase.disconnect()
+    } catch (error) {
+      console.error('Error disconnecting Postgres client:', error)
+    }
+
+    try {
+      await postgresTestContainer.stopContainer()
+    } catch (error) {
+      console.error('Error stopping Postgres container:', error)
+    }
+  })
 
   it('should connect to the database and execute a query', async () => {
     await postgresDatabase.connect()

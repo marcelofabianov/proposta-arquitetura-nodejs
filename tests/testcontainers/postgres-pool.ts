@@ -1,16 +1,16 @@
-import { Client } from 'pg'
+import { Pool, PoolClient, PoolConfig } from 'pg'
 import {
   PostgreSqlContainer,
   StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql'
 
-export class PostgresTestContainer {
+export class PostgresPoolTestContainer {
   private container: StartedPostgreSqlContainer | null
-  private postgresClient: Client | null
+  private pool: Pool | null
 
   public constructor() {
     this.container = null
-    this.postgresClient = null
+    this.pool = null
   }
 
   public async createContainer(): Promise<void> {
@@ -39,21 +39,25 @@ export class PostgresTestContainer {
         throw new Error('Postgres container failed to start')
       }
 
-      const options = {
+      const options: PoolConfig = {
         user: container.getUsername(),
         host: container.getHost(),
         database: container.getDatabase(),
         password: container.getPassword(),
         port: container.getMappedPort(5432),
+        max: 10,
+        idleTimeoutMillis: 60000,
+        connectionTimeoutMillis: 30000,
       }
-      const postgresClient = new Client(options)
-      await postgresClient.connect()
+
+      const pool = new Pool(options)
+      await pool.connect()
 
       this.container = container
-      this.postgresClient = postgresClient
+      this.pool = pool
     } catch (error) {
       console.error(
-        'Failed to create or connect to the Postgres container:',
+        'Failed to create or connect to the Postgres pool container:',
         error,
       )
       throw error
@@ -61,23 +65,30 @@ export class PostgresTestContainer {
   }
 
   public async stopContainer(): Promise<void> {
-    if (!this.container || !this.postgresClient) {
+    if (!this.container || !this.pool) {
+      console.error('Postgres container or pool is not initialized')
       return
     }
+    console.log('Stopping Postgres container and closing the pool...')
 
     try {
-      await this.postgresClient.end()
+      await this.pool.end()
       await this.container.stop()
     } catch (error) {
       console.error(
-        'Failed to stop the Postgres container or close the client:',
+        'Failed to stop the Postgres container or close the pool:',
         error,
       )
       throw error
     }
+
+    this.container = null
+    this.pool = null
+
+    console.log('Postgres container stopped and pool closed')
   }
 
-  public getOptions(): any {
+  public getOptions(): PoolConfig {
     if (!this.container) {
       throw new Error('Postgres container is not initialized')
     }
@@ -88,20 +99,27 @@ export class PostgresTestContainer {
       database: this.container.getDatabase(),
       password: this.container.getPassword(),
       port: this.container.getMappedPort(5432),
+      max: 10,
+      idleTimeoutMillis: 60000,
+      connectionTimeoutMillis: 30000,
     }
   }
 
-  public async runQuery(query: string): Promise<any[]> {
-    if (!this.postgresClient) {
-      throw new Error('Postgres client is not initialized')
+  public async runQuery(query: string, params?: any[]): Promise<any[]> {
+    if (!this.pool) {
+      throw new Error('Postgres pool is not initialized')
     }
 
+    const client: PoolClient = await this.pool.connect()
+
     try {
-      const result = await this.postgresClient.query(query)
+      const result = await client.query(query, params)
       return result.rows
     } catch (error) {
       console.error('Failed to run the query:', error)
       throw error
+    } finally {
+      client.release()
     }
   }
 }
