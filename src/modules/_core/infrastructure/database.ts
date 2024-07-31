@@ -1,10 +1,14 @@
-import { QueryResultRow } from 'pg'
+export interface CoreQueryResultRow {
+  [column: string]: any
+}
 
-export type QueryParams = string | number | boolean | null
+export type CoreQueryParams = string | number | boolean | null
 
-export interface DatabaseInterface {
-  query<T extends QueryResultRow>(
+export interface CoreDatabaseInterface {
+  connect(): Promise<void>
+  disconnect(): Promise<void>
+  query<T extends CoreQueryResultRow>(
     text: string,
-    params?: QueryParams[],
+    params?: CoreQueryParams[],
   ): Promise<T[]>
 }
