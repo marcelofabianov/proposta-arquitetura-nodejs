@@ -1,20 +1,21 @@
-import { Client, QueryResult, QueryResultRow } from 'pg'
-import { ClientConfig } from '@/services/database/config'
+import { Pool, QueryResult, QueryResultRow } from 'pg'
+import { PoolConfig } from '@/services/database/config'
+
 import { DatabaseInterface, QueryParams } from './database-interface'
 import { DatabaseQueryError } from '@/modules/_core/infrastructure/error'
 
-export class PostgresClientDatabase implements DatabaseInterface {
-  private client: Client
+export class PostgresPoolDatabase implements DatabaseInterface {
+  private pool: Pool
   private isConnected: boolean = false
 
-  public constructor(options: ClientConfig) {
-    this.client = new Client(options)
+  public constructor(options: PoolConfig) {
+    this.pool = new Pool(options)
   }
 
   public async connect(): Promise<void> {
     if (!this.isConnected) {
       try {
-        await this.client.connect()
+        await this.pool.connect()
         this.isConnected = true
       } catch (error: unknown) {
         let errorMessage: string
@@ -34,7 +35,7 @@ export class PostgresClientDatabase implements DatabaseInterface {
   public async disconnect(): Promise<void> {
     if (this.isConnected) {
       try {
-        await this.client.end()
+        await this.pool.end()
         this.isConnected = false
       } catch (error: unknown) {
         let errorMessage: string
@@ -58,7 +59,7 @@ export class PostgresClientDatabase implements DatabaseInterface {
     await this.connect()
 
     try {
-      const result: QueryResult<T> = await this.client.query<T>(text, params)
+      const result: QueryResult<T> = await this.pool.query<T>(text, params)
       return result.rows
     } catch (error: unknown) {
       let errorMessage: string
